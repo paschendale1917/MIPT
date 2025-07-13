@@ -33,8 +33,6 @@ enum {
   december
 };
 
-enum mode { readFromFile = 0, writeToFile };
-
 typedef struct {
   uint16_t year;
   uint8_t month;
@@ -59,7 +57,7 @@ extern data_month m_data;
 
 extern char csvfile_name[];
 extern char csvbigfile_name[];
-extern enum mode md;
+
 
 
 int32_t char2num(char *p, char stop_symb);
@@ -69,5 +67,7 @@ float month_average_temp(data_month *dt);                                       
 int8_t month_min_temp(data_month *dt);                                            //ищем минимальную температуру
 uint8_t print_month_info(data *dt,data_month *dt_dest,uint8_t num_month);
 void print_yearstat_info(data *dt_source, data_month *dt_dest);
+uint64_t encode_date(record *dt);                                                 //функция кодирования даты в число для сортировки
+void sortByTemp(data_month *dt);                                                //сортировка по температуре
 
 #endif

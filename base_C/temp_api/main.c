@@ -18,8 +18,8 @@ uint8_t get_filename(char *sourse, char *dest_name) {
 void print_help(void) {
   printf("Supported arguments:\n");
   printf("-h                                 -- help\n");
-  printf("-f <filename.csv>                  -- .csv file to load. show statistics for all months by the year\n");
-  printf("-f <filename.csv> -m <month>       -- show statistics for target <month> \n");
+  printf("-f <filename.csv>                  -- .csv file to load. it will show statistics for all months by the year\n");
+  printf("-f <filename.csv> -m<month>        -- show statistics for target <month> \n");
   printf("-v                                 -- version\n");
 }
 
@@ -45,8 +45,8 @@ void args(int32_t argc, char *argv[]) {
         printf("%s\n", version);
         break;
       case 'm':
-        p += 2;
-        if (res!=ERROR) {
+        p++;
+        if (res!=ERROR){
           (char2num(p, '\000')>=1&&char2num(p, '\000')<=12)?read_data(&full_data, filename):*p;//читаем данные только если введен корректный номер месяца
           print_month_info(&full_data, &m_data, char2num(p, '\000'));
         }
@@ -57,6 +57,7 @@ void args(int32_t argc, char *argv[]) {
         if (/* res!=ERROR&& */*(p + f_name + 1) != '-') {    
          res=read_data(&full_data, filename);                // если после наименования файла нет '-', то вывожу данные за год
           print_yearstat_info(&full_data,&m_data);     // если есть, то происходит выход из свитча по брейку
+          res=0;
         }                                                                 // и функция прыгает  в if
         break;
       default:

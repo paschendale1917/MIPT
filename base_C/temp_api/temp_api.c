@@ -34,6 +34,24 @@ void swap(record *dt, uint32_t i, uint32_t j) {
   *(dt + j) = temp;
 }
 
+void quick_sortByTemp(data_month *dt, uint32_t left, uint32_t right) {
+  if(!dt->meas_month)return;
+  if (left >= right) return;
+  uint32_t i = left, j = right;
+  record pivot = dt->measure_month[(left + right) / 2];
+  while (i <= j) {
+    while (dt->measure_month[i].temp < pivot.temp) i++;
+    while (dt->measure_month[j].temp > pivot.temp) j--;
+    if (i <= j) {
+      swap(dt->measure_month, i, j);
+      i++;
+      j--;
+    }
+  }
+  left < j?quick_sortByTemp(dt, left, j):left;
+  i < right?quick_sortByTemp(dt, i, right):right;
+}
+
 // упорядочиваем данные в массиве структур типа data_month по возрастанию
 // температуры
 void sortByTemp(data_month *dt) {
@@ -102,7 +120,7 @@ void get_month_data(data *dt_source, data_month *dt_dest,
 
 // функция расчета средней температуры в отдельно взятом месяце
 float month_average_temp(data_month *dt) {
-  int16_t result = 0;
+  int32_t result = 0;
   if(!dt->meas_month)return 0;
   for (uint16_t i = 0; i < dt->meas_month; i++) {
     result += dt->measure_month[i].temp;
@@ -113,12 +131,15 @@ float month_average_temp(data_month *dt) {
 
 /*дурные функции, постоянно заставляющие сортировать огромные массивы данных*/
 int8_t month_min_temp(data_month *dt) {
-  sortByTemp(dt);
+ // sortByTemp(dt);
+  quick_sortByTemp(dt, 0, dt->meas_month - 1); // сортируем по температуре
   return dt->measure_month[0].temp;
 }
 
 int8_t month_max_temp(data_month *dt) {
-  sortByTemp(dt);
+  // sortByTemp(dt);
+  quick_sortByTemp(dt, 0, dt->meas_month - 1); // сортируем по температуре
+  if(!dt->meas_month)return 0;
   return dt->measure_month[dt->meas_month - 1].temp;
 }
 /* ************************************************************************** */
@@ -175,7 +196,8 @@ uint8_t print_month_info(data *dt_source, data_month *dt_dest, uint8_t num_month
   get_month_data(dt_source, dt_dest,
                  num_month);                                   // забрал данные из импортированного .csv файла
   av = month_average_temp(dt_dest);
-  sortByTemp(dt_dest);
+  //sortByTemp(dt_dest);
+  quick_sortByTemp(dt_dest, 0, dt_dest->meas_month - 1); // сортируем по температуре
   print_title_name(stat_month);
   print_title();
   print_month_data(dt_dest, num_month, av);
@@ -192,7 +214,8 @@ void print_yearstat_info(data *dt_source, data_month *dt_dest) {
   for (uint8_t j = 1; j <= 12; j++) {
     float av = 0;
     get_month_data(dt_source, dt_dest,j);                     // забрал данные за искомый месяц из импортированного .csv файла
-    sortByTemp(dt_dest);       
+    //sortByTemp(dt_dest); 
+    quick_sortByTemp(dt_dest, 0, dt_dest->meas_month - 1); // сортируем по температуре      
     av = month_average_temp(dt_dest);                                   //посчитал среднюю температуру
     year_min=dt_dest->measure_month[0].temp;                               //после сортировки минимальная температура по месяцу в нулевом элементе массива структур
     missing_month+=print_month_data(dt_dest, j, av);
