@@ -1,0 +1,96 @@
+#include "temp_api.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+const char *version = "v1.4.0";
+char filename[65535] = {0};
+
+uint8_t get_filename(const char *source, char *dest_name) {
+  uint16_t t = 0;
+  while (*source && *source != ' ' && t < 65535) {
+    dest_name[t++] = *source++;
+  }
+  dest_name[t] = '\0';
+  return t;
+}
+
+void print_help(void) {
+  printf("Supported arguments:\n");
+  printf("-h                                 -- help\n");
+  printf("-f <filename.csv>                  -- .csv file to load. it will show statistics for all months by the year\n");
+  printf("-f <filename.csv> -m<month>        -- show statistics for target <month> \n");
+  printf("-v                                 -- version\n");
+}
+
+void print_about(void) {
+  printf("\n======================================================\n");
+  printf("\nThis is a simple temperature statistic program (%s).\n", version);
+  printf("To get help use the key -h.\n");
+  printf("\n======================================================\n\n");
+}
+
+void args(int32_t argc, char *argv[]) {
+  if (argc < 2) {
+    print_about();
+    return;
+  }
+  int8_t res =5;
+  uint8_t month = 0;
+  for (uint8_t i = 1; i < argc; i++) {
+    char *p = argv[i];
+    if (*p == '-') {
+      p++;
+      switch (*p) {
+      case 'h':
+        print_help();
+        break;
+      case 'v':
+        printf("%s\n", version);
+        break;
+      case 'f': {
+        p+=2;
+        while (*p == ' ') p++; // пропуск пробелов
+        if (*p) {
+          get_filename(p, filename);
+          res = read_data(&full_data, filename);
+          if (res==ERROR) {
+            printf("Error reading file.\n");
+            return;
+          }
+        } else {
+          printf("No file name specified after -f\n");
+          return;
+        }
+        break;
+      }
+      case 'm': {
+        p++;
+        month = (uint8_t)char2num(p, '\0');
+        if (month < 1 || month > 12) {
+          printf("Invalid month number: %d\n", month);
+          return;
+        }
+        if (res==5) {
+          printf("Please specify a file using -f <filename.csv>\n");
+          return;
+        }
+        print_month_info(&full_data, &m_data, month);
+        break;
+      }
+      default:
+        printf("Unknown option: %s\n", argv[i]);
+        break;
+      }
+    }
+  }
+  // Если был только -f, выводим статистику по году
+  if (res==SUCCESS && !month) {
+    print_yearstat_info(&full_data, &m_data);
+  }
+}
+
+int main(int32_t argc, char *argv[]) {
+  args(argc, argv);
+  return 0;
+}
