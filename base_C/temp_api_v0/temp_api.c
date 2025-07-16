@@ -8,13 +8,13 @@
 // 4) если за месяц, то находим данные за него, производим вычисления, выводим
 
 //для отладки
-char csvfile_name[] = "temperature_small.csv";
-char csvbigfile_name[] = "temperature_big.csv";
+const char csvfile_name[] = "temperature_small.csv";
+const char csvbigfile_name[] = "temperature_big.csv";
 
 //заголовки 
-char stat_month[]="STATISTICS BY MONTH";
-char stat_month_by_year[]="STATISTICS BY MONTH FOR THE YEAR";
-char stat_year[]="STATISTICS FOR THE YEAR";
+const char stat_month[]="STATISTICS BY MONTH";
+const char stat_month_by_year[]="STATISTICS BY MONTH FOR THE YEAR";
+const char stat_year[]="STATISTICS FOR THE YEAR";
 
 //структуры для хранения импортированных данных и данных за месяц
 data full_data;
@@ -145,8 +145,8 @@ int8_t month_max_temp(data_month *dt) {
 /* ************************************************************************** */
 
 
-int8_t year_average_temp(data *dt) {
-  int16_t result = 0;
+float year_average_temp(data *dt) {
+  float result = 0;
   for (uint8_t i = 0; i < dt->meas_amount; i++) {
     result += dt->measure[i].temp;
   }
@@ -159,7 +159,7 @@ void print_title(void) {
   printf("-----   ----------    ------------         ----------      ----------\n");
 }
 
-void print_title_name(char *title_name){
+void print_title_name(const char *title_name){
 printf("\n====================%s====================\n\n",title_name);
 }
 
@@ -231,53 +231,59 @@ void print_yearstat_info(data *dt_source, data_month *dt_dest) {
 int32_t char2num(char *p, char stop_symb) {
   int32_t num = 0;
   uint8_t negative = 0;
-  while (*p != stop_symb && *p != '\n'&& *p != '\r' && *p != '\000') {
-    *p!=' '?p:p++;                                                         //проверил, нет ли случаем пробелов перед значащим символом
-    if (*p == '-') {                                                       //если минус, то поднимаем флаг отрицательного числа
+  while (*p != stop_symb && *p != '\n' && *p != '\r' && *p != '\0') {
+    if (*p == ' ') { // пропускаем пробелы
+      p++;
+      continue;
+    }
+    if (*p == '-') { // если минус, то поднимаем флаг отрицательного числа
       negative = 1;
       p++;
-    } else if (*p >= '0' && *p <= '9') {                                   //из символов в число
+    } else if (*p >= '0' && *p <= '9') { // из символов в число
       num = num * 10 + (*p - '0');
       p++;
-    } else {                                                               //если какие-то иные символы, то возвращаем ошибку
-      //p++;
-       return DATA_ERROR; 
+    } else { // если какие-то иные символы, то возвращаем ошибку
+      return DATA_ERROR;
     }
   }
   return negative ? -num : num;
 }
 
 void clear_string(char *string) {
-  for (uint8_t i = 0; i < STRING_LENTH; i++) {
-    *(string + i) = 0;
+  for (uint8_t i = 0; i < STRING_LENGTH; i++) {
+    string[i] = 0;
   }
 }
 
 int8_t read_data(data *dt, char *csv_name) {
   uint32_t meas_cntr = 0;
-  int year = 0;
-  int month = 0,day = 0,hour = 0,min = 0,n_scan=0;
-  int temp = 0;
+  int year = 0, month = 0, day = 0, hour = 0, min = 0, n_scan = 0, temp = 0;
   uint32_t string_cntr = 0;
   FILE *rd = fopen(csv_name, "rb");
   if (rd == NULL) {
-    printf("\nAchtung!Read error or unknown option!\n\n");
+    printf("\nWarning: read error or unknown option!\n\n");
     return ERROR;
   }
-  while((n_scan = fscanf(rd, "%d;%d;%d;%d;%d;%d", &year, &month, &day, &hour, &min, &temp))){
-        if (n_scan < 6){
-          char s[20];
-          if(n_scan==-1) {
-            fclose(rd);
-            return DATA_ERROR;
-          }
-          n_scan = fscanf(rd, "%[^\n]", s); 
-          printf("\nString №%u data format not supported. Skip.\n",++string_cntr);
-        }else {
-          string_cntr++;
-          add_record(dt->measure, meas_cntr, year, month, day, hour, min, temp);
-          dt->meas_amount = meas_cntr++;
-        } 
+  while ((n_scan = fscanf(rd, "%d;%d;%d;%d;%d;%d", &year, &month, &day, &hour, &min, &temp))) {
+    if (n_scan < 6) {
+      char s[20];
+      if (n_scan == -1) {
+        fclose(rd);
+        return DATA_ERROR;
+      }
+      n_scan = fscanf(rd, "%[^\n]", s);
+      printf("\nString №%u data format not supported. Skipping.\n", ++string_cntr);
+    } else {
+      string_cntr++;
+      if (meas_cntr < NUM_MEAS) { // защита от переполнения массива
+        add_record(dt->measure, meas_cntr, year, month, day, hour, min, temp);
+        dt->meas_amount = meas_cntr++;
+      } else {
+        printf("\nWarning: measurement array overflow, skipping data.\n");
+        break;
+      }
+    }
   }
- return SUCCESS;
+  fclose(rd);
+  return SUCCESS;
 }

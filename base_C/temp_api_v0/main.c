@@ -2,16 +2,15 @@
 #include <stdint.h>
 #include <stdio.h>
 
-char *version = "v1.3";
-char filename[] = "";
-uint8_t u = 0;
+const char *version = "v1.3";
+char filename[65535] = {0};
 
-uint8_t get_filename(char *sourse, char *dest_name) {
-  char *pp = sourse;
-  uint8_t t = 0;
-  while (*pp != '\000' /*  && *pp != ' ' */) {
-    *(dest_name + (t++)) = *(pp++);
-  };
+uint8_t get_filename(const char *source, char *dest_name) {
+  uint16_t t = 0;
+  while (*source && *source != ' ' && t < 65535) {
+    dest_name[t++] = *source++;
+  }
+  dest_name[t] = '\0';
   return t;
 }
 
@@ -31,7 +30,11 @@ void print_about(void) {
 }
 
 void args(int32_t argc, char *argv[]) {
-  for (uint8_t i = 0; i < argc; i++) {
+   if (argc < 2) {
+    print_about();
+    return;
+  }
+  for (uint8_t i = 1; i < argc; i++) {
     char *p = argv[i];
     int8_t res=0;
     uint8_t f_name=0;
@@ -56,17 +59,15 @@ void args(int32_t argc, char *argv[]) {
         f_name = get_filename(p, filename);          // считал наименование входного файла и подсчитал кол-во символов
         if (/* res!=ERROR&& */*(p + f_name + 1) != '-') {    
          res=read_data(&full_data, filename);                // если после наименования файла нет '-', то вывожу данные за год
-          print_yearstat_info(&full_data,&m_data);     // если есть, то происходит выход из свитча по брейку
-          res=0;
+         res!=ERROR?print_yearstat_info(&full_data,&m_data):0;     // если есть, то происходит выход из свитча по брейку
+         res=0;
         }                                                                 // и функция прыгает  в if
         break;
       default:
         printf("Unknown option: %s\n", argv[i]);
         break;
       }
-    } else if (argc < 2) {
-      print_about();
-    }
+    } 
   }
 }
 

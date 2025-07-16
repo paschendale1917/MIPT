@@ -1,14 +1,15 @@
 #include "temp_api.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
-const char *version = "v1.4.0";
-char filename[65535] = {0};
+#define FILENAME_LENGTH 256
+
+const char *version = "v1.5.0";
+char filename[FILENAME_LENGTH] = {0};
 
 uint8_t get_filename(const char *source, char *dest_name) {
   uint16_t t = 0;
-  while (*source && *source != ' ' && t < 65535) {
+  while (*source && *source != ' ' && t < FILENAME_LENGTH - 1) {
     dest_name[t++] = *source++;
   }
   dest_name[t] = '\0';
@@ -53,7 +54,7 @@ void args(int32_t argc, char *argv[]) {
         while (*p == ' ') p++; // пропуск пробелов
         if (*p) {
           get_filename(p, filename);
-          res = read_data(&full_data, filename);
+          res = read_full_data(&full_data, filename);
           if (res==ERROR) {
             printf("Error reading file.\n");
             return;
@@ -68,14 +69,14 @@ void args(int32_t argc, char *argv[]) {
         p++;
         month = (uint8_t)char2num(p, '\0');
         if (month < 1 || month > 12) {
-          printf("Invalid month number: %d\n", month);
+          printf("Invalid month number: %d\n\n", month);
           return;
         }
         if (res==5) {
-          printf("Please specify a file using -f <filename.csv>\n");
+          printf("\nPlease specify a file using -f <filename.csv>\n\n");
           return;
         }
-        print_month_info(&full_data, &m_data, month);
+        print_month_info(filename,month);
         break;
       }
       default:
@@ -86,11 +87,15 @@ void args(int32_t argc, char *argv[]) {
   }
   // Если был только -f, выводим статистику по году
   if (res==SUCCESS && !month) {
-    print_yearstat_info(&full_data, &m_data);
+    print_yearstat_info(filename);
   }
 }
 
 int main(int32_t argc, char *argv[]) {
-  args(argc, argv);
+   args(argc, argv);
+ // read_full_data(&full_data, csvbigfile_name);
+ // read_month_data(&m_data, csvfile_name, 1);
+ // print_month_info(csvfile_name, 1);
+//print_yearstat_info( csvfile_name);
   return 0;
 }
