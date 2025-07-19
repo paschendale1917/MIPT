@@ -303,12 +303,10 @@ void print_yearstat_info(const char *csv_name) {
     continue;
     }
     float av = get_average_temp(m_data);
-    if (m_data->meas) {
-      valid_months++;
-      year_min = year_min > m_data->measure.temp ? m_data->measure.temp : year_min;
-      year_max = year_max < m_data->measure.temp ? m_data->measure.temp : year_max;
-      year_avg += av;
-    }
+    valid_months++;
+    year_min = year_min > m_data->measure.temp ? m_data->measure.temp : year_min;
+    year_max = year_max < m_data->measure.temp ? m_data->measure.temp : year_max;
+    year_avg += av;
     print_month_data(m_data, j, av);
   }
   printf("\n");
