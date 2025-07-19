@@ -314,17 +314,6 @@ void print_yearstat_info(const char *csv_name) {
   printf("\n");
   print_title_name(stat_year);
   print_year_data(year_avg, year_max, year_min, valid_months);
-  //   if(errors[0]){
-  //   printf("\nStrings № ");
-  //   for(uint32_t i = 0; i < sizeof(errors)/sizeof(errors[0]); i++) {
-  //     if(errors[i]){
-  //       if (!errors[i] && errors[i] == errors[i - 1]) continue; // пропускаем дубликаты и нули
-  //     printf("%u ", errors[i]);
-  //   }
-  // }
-  // printf("data format not supported. Data was skipped.\n");
-  // }
-
 }
 
 

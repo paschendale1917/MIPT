@@ -1,0 +1,9 @@
+{
+    "terminal.integrated.shell.windows": "C:/WINDOWS/System32/cmd.exe",
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": false,
+    "[c]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+    },
+
+}
