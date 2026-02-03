@@ -5,7 +5,6 @@
 #include <inttypes.h>
 #include <string.h>
 #include <unistd.h>
-//#include <ctype.h> // for toupper()
 
 #define CONTROLS                                        2
 #define MIN_Y                                           5                                                                           
@@ -14,7 +13,7 @@
 enum {LEFT=1, UP, RIGHT, DOWN, EXIT_GAME=KEY_F(10),END_GAME};
 enum {MAX_TAIL_SIZE=100, START_TAIL_SIZE=2, MAX_FOOD_SIZE=20, FOOD_EXPIRE_SECONDS=10, AMOUNT_FOOD_SPAWN=5};
 
-// Structure for control keys
+// структура направлений движения
 struct control_buttons {
     uint32_t down;
     uint32_t up;
@@ -22,24 +21,25 @@ struct control_buttons {
     uint32_t right;
 };
 
-// Standard control keys
+// массив структур с кнопками управления
 struct control_buttons default_controls[CONTROLS] = {
     {KEY_DOWN, KEY_UP, KEY_LEFT, KEY_RIGHT},    
     {'s', 'w', 'a', 'd'}                        
 };
 
-// Structure for one tail segment
+//структура с координатами элемента хвоста
 typedef struct tail_t {
     uint32_t x;
     uint32_t y;
 } tail_t;
 
+//структура для хранения размера окна терминала
  typedef struct {
     int32_t x;
     int32_t y;
 }window_size_t;
 
-// Snake structure
+// струтура , описывающая змею
 typedef struct snake_t {
     uint32_t x;                                                  // координата X головы 
     uint32_t y;                                                  // координата Y головы 
@@ -47,11 +47,9 @@ typedef struct snake_t {
     size_t tsize;                                                // размер хвоста
     struct tail_t *tail;                                         // указатель на список хврста
     struct control_buttons controls;                             // массив кнокпок для управления
-    uint32_t score;
- //   uint8_t is_alive;
 } snake_t;
 
-// Food structure
+//структура еды
 typedef struct food_t {
     uint32_t x;
     uint32_t y;
@@ -66,24 +64,22 @@ void getWindowSize(window_size_t *size){
     getmaxyx(stdscr, size->y, size->x);
 }
 
-// Initialize tail (zero coordinates)
+// инит хвоста
 void initTail(tail_t t[], size_t size) {
     tail_t init_t = {0,0};
     for(size_t i=0; i<size; i++) t[i] = init_t;
 }
 
-// Initialize snake head
+// инит змеиной башки
 void initHead(snake_t *head, int32_t x, int32_t y) {
     if(x<MIN_X)x=MIN_X;
     if(y<MIN_Y)y=MIN_Y;
     head->x = x;
     head->y = y;
     head->direction = RIGHT;                                                                
-    head->score = 0;
-  //  head->is_alive = 1;
 }
 
-// Initialize whole snake
+// инит змеи
 void initSnake(snake_t *head, size_t size, int x, int y) {
     tail_t *tail = (tail_t*) malloc(MAX_TAIL_SIZE*sizeof(tail_t));
     initTail(tail, MAX_TAIL_SIZE);
