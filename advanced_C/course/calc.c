@@ -13,6 +13,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <locale.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -313,6 +314,8 @@ double (*g_lower2)(double) = NULL;
 
 /* Основная функция */
 int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "ru_RU.UTF-8");
+
     int i;
     double eps = EPS_DEFAULT;
     int print_cross = 0;
